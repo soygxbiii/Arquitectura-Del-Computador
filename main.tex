@@ -1,0 +1,91 @@
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[top=1.5cm, bottom=1.5cm, left=1.5cm, right=1.5cm]{geometry} 
+\usepackage{array}
+
+\begin{document}
+
+\begin{center}
+    \vspace*{1.5cm} 
+    \huge \textbf{Hoja de Referencia} \\[0.3cm]
+    \Large \textbf{MIPS 32}
+    \vspace{1.2cm} 
+
+    {\large \textbf{FORMATOS BÁSICOS DE INSTRUCCIÓN}}
+    \vspace{0.3cm}
+
+    \normalsize 
+    \setlength{\tabcolsep}{10pt} 
+    \renewcommand{\arraystretch}{1.3} 
+
+    \begin{tabular}{|c|l|l|}
+    \hline
+    \textbf{Tipo} & \textbf{Significado} & \textbf{¿Para qué sirve?} \\ \hline
+    \textbf{R} & Registro & Operaciones entre registros (ej: suma, resta, lógica). \\ \hline
+    \textbf{I} & Inmediato & Uso de constantes o accesos a memoria (load/store). \\ \hline
+    \textbf{J} & Jump (Salto) & Saltos incondicionales a direcciones distantes. \\ \hline
+    \end{tabular}
+\end{center}
+
+\vspace{0.6cm} 
+
+\begin{center}
+    {\large \textbf{LENGUAJE ENSAMBLADOR}}
+    \vspace{0.3cm}
+    \normalsize 
+    \setlength{\tabcolsep}{5pt} 
+    \renewcommand{\arraystretch}{1.2} 
+
+    \begin{tabular}{|l|c|c|l|l|}
+    \hline
+    \textbf{Categoría} & \textbf{Form.} & \textbf{Inst.} & \textbf{Ejemplo} & \textbf{Significado} \\ \hline
+    & R & add & \texttt{add \$s1, \$s2, \$s3} & \texttt{\$s1 = \$s2 + \$s3} \\ \cline{2-5} 
+    Aritmética & R & sub & \texttt{sub \$s1, \$s2, \$s3} & \texttt{\$s1 = \$s2 - \$s3} \\ \cline{2-5} 
+    & I & addi & \texttt{addi \$s1, \$s2, 100} & \texttt{\$s1 = \$s2 + 100} \\ \hline
+
+    Transf. de & I & lw & \texttt{lw \$s1, 100(\$s2)} & \texttt{\$s1 = Memory[\$s2 + 100]} \\ \cline{2-5} 
+    datos & I & sw & \texttt{sw \$s1, 100(\$s2)} & \texttt{Memory[\$s2 + 100] = \$s1} \\ \hline
+
+    & R & and & \texttt{and \$s1, \$s2, \$s3} & \texttt{\$s1 = \$s2 \& \$s3} \\ \cline{2-5} 
+    Lógica & R & or & \texttt{or \$s1, \$s2, \$s3} & \texttt{\$s1 = \$s2 | \$s3} \\ \cline{2-5} 
+    & R & sll & \texttt{sll \$s1, \$s2, 10} & \texttt{\$s1 = \$s2} $\ll$ 10 \\ \hline
+
+    Salto & I & beq & \texttt{beq \$s1, \$s2, L} & \texttt{if(\$s1==\$s2) go to L; PC+4+100} \\ \cline{2-5} 
+    condicional & I & bne & \texttt{bne \$s1, \$s2, L} & \texttt{if(\$s1!=\$s2) go to L; PC+4+100} \\ \cline{2-5} 
+    & R & slt & \texttt{slt \$s1, \$s2, \$s3} & \texttt{if(\$s2<\$s3) \$s1=1; else \$s1=0} \\ \cline{2-5} 
+    & I & slti & \texttt{slti \$s1, \$s2, 100} & \texttt{if(\$s2<100) \$s1=1; else \$s1=0} \\ \hline
+
+    Salto & J & jal & \texttt{jal 2500} & \texttt{\$ra = PC + 4; go to 10000} \\ \cline{2-5} 
+    incondicional & R & jr & \texttt{jr \$ra} & \texttt{go to \$ra} \\ \hline
+    \end{tabular}
+\end{center}
+
+\vspace{0.6cm}
+
+\begin{center}
+    \normalsize 
+    \setlength{\tabcolsep}{10pt} 
+    \renewcommand{\arraystretch}{1.2} 
+
+    \begin{tabular}{|l|l|}
+    \hline
+    add / sub & Suma o resta de registros con destino en un tercero. \\ \hline
+    addi & Operación aritmética usando una constante inmediata. \\ \hline
+    lw / sw & Cargar desde memoria a registro / Guardar registro en memoria. \\ \hline
+    and / or & Operaciones lógicas a nivel de bits (AND / OR). \\ \hline
+    sll & Desplazamiento lógico a la izquierda (multiplicación por $2^n$). \\ \hline
+    beq / bne & Saltos basados en igualdad o desigualdad de registros. \\ \hline
+    slt / slti & "Set on less than": activa el registro si la comparación es menor. \\ \hline
+    jal / jr & Salto con enlace (para funciones) / Salto a dirección de registro. \\ \hline
+    \end{tabular}
+\end{center}
+
+\vfill
+
+\begin{flushright}
+\textbf{Gabriela Mora} \\
+V-31.541.893
+\end{flushright}
+
+\end{document}
