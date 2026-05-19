@@ -1,2 +1,3 @@
-# Hoja-de-Referencia-de-Mips32
-Gabriela Mora, V-31.541.893
+# Arquitectura del Computador
+Profesor: Jose Canache
+Alumna: Gabriela Mora, V-31.541.893
