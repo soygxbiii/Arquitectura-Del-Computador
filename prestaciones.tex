@@ -1,0 +1,111 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{geometry}
+\usepackage{booktabs}
+\geometry{
+    a4paper,
+    total={185mm,260mm},
+    left=12mm,
+    top=15mm,
+}
+
+\setlength{\parindent}{0pt}
+\renewcommand{\arraystretch}{2.2}
+
+\begin{document}
+
+\begin{center}
+    {\LARGE\bfseries HOJA DE REFERENCIA} \\[3mm]
+    {\Large\bfseries ARQUITECTURA DEL COMPUTADOR} \\[2mm]
+    {\large\bfseries PRESTACIONES} \\[10mm]
+
+    {\large\bfseries 1. FORMULARIO CRÍTICO DE RENDIMIENTO} \\[5mm]
+
+    \large 
+    \begin{tabular}{|m{4.5cm}|m{5.5cm}|m{7.5cm}|}
+    \hline
+    \centering \textbf{Nombre de la Fórmula} & \centering \textbf{Fórmula} & \centering \textbf{Motivo} \cr \hline
+    
+    Relación de Rendimiento & 
+    \centering $\displaystyle n = \frac{\text{Rend}_X}{\text{Rend}_Y} = \frac{\text{Tiempo}_Y}{\text{Tiempo}_X}$ & 
+    Se usa para comparar dos máquinas y saber cuántas veces ($n$) una es más rápida que la otra. \cr \hline
+    
+    Tiempo de CPU (Frecuencia) & 
+    \centering $\displaystyle \text{T}_{\text{CPU}} = \frac{I \times \text{CPI}}{f}$ & 
+    Se aplica para calcular el tiempo total en segundos cuando conocemos la frecuencia en Hz, MHz o GHz. \cr \hline
+    
+    Tiempo de CPU (Ciclo) & 
+    \centering $\displaystyle \text{T}_{\text{CPU}} = I \times \text{CPI} \times T_c$ & 
+    Se aplica para calcular el tiempo total si conocemos la duración de un ciclo de reloj (ns o ps). \cr \hline
+    
+    CPI Promedio & 
+    \centering $\displaystyle \text{CPI}_{\text{Prom}} = \sum (\text{CPI}_i \times F_i)$ & 
+    Se usa cuando el programa tiene distintos tipos de instrucciones con diferentes costes de ciclos. \cr \hline
+    
+    Ley de Amdahl & 
+    \centering $\displaystyle G_{\text{Global}} = \frac{1}{(1 - f_m) + \frac{f_m}{G_m}}$ & 
+    Sirve para calcular cuánto mejora el rendimiento total al acelerar solo una parte específica del sistema. \cr \hline
+    
+    MIPS & 
+    \centering $\displaystyle \text{MIPS} = \frac{I}{\text{Tiempo} \times 10^6}$ & 
+    Se utiliza para medir el rendimiento en términos de millones de instrucciones ejecutadas por segundo. \cr \hline
+    \end{tabular}
+\end{center}
+
+\vspace*{\fill}
+\begin{flushright}
+    \textbf{\large Gabriela Mora} \\
+    \textbf{\large V-31.541.893}
+\end{flushright}
+\newpage
+
+\begin{center}
+    {\large\bfseries 2. SISTEMAS DE UNIDADES Y CONVERSIÓN} \\[8mm]
+    
+    \large 
+    
+    \textbf{\large A) Frecuencia (Hertz - Hz)} \\[3mm]
+    \begin{tabular}{|m{5cm}|m{4cm}|m{7cm}|}
+    \hline
+    \centering \textbf{Unidad} & \centering \textbf{Símbolo} & \centering \textbf{Multiplicador matemático} \cr \hline
+    KiloHertz & \centering KHz & \centering $\times 10^3$ (1.000 Hz) \cr \hline
+    MegaHertz & \centering MHz & \centering $\times 10^6$ (1.000.000 Hz) \cr \hline
+    GigaHertz & \centering GHz & \centering $\times 10^9$ (1.000.000.000 Hz) \cr \hline
+    \end{tabular}
+    
+    \vspace{12mm}
+    
+    \textbf{\large B) Tiempo (Segundos - s)} \\[3mm]
+    \begin{tabular}{|m{5cm}|m{4cm}|m{7cm}|}
+    \hline
+    \centering \textbf{Unidad} & \centering \textbf{Símbolo} & \centering \textbf{Equivalencia en segundos} \cr \hline
+    Milisegundo & \centering ms & \centering $\times 10^{-3}$ (0,001 s) \cr \hline
+    Microsegundo & \centering $\mu$s & \centering $\times 10^{-6}$ (0,000001 s) \cr \hline
+    Nanosegundo & \centering ns & \centering $\times 10^{-9}$ (0,000000001 s) \cr \hline
+    Picosegundo & \centering ps & \centering $\times 10^{-12}$ (0,000000000001 s) \cr \hline
+    \end{tabular}
+    
+    \vspace{12mm}
+    
+    \textbf{\large C) Capacidad (Bytes - B)} \\[3mm]
+    \begin{tabular}{|m{5cm}|m{4cm}|m{7cm}|}
+    \hline
+    \centering \textbf{Unidad} & \centering \textbf{Símbolo} & \centering \textbf{Tamaño Exacto (Base 2)} \cr \hline
+    KiloByte & \centering KB & \centering $2^{10}$ Bytes (1.024 B) \cr \hline
+    MegaByte & \centering MB & \centering $2^{20}$ Bytes (1.048.576 B) \cr \hline
+    GigaByte & \centering GB & \centering $2^{30}$ Bytes (1.073.741.824 B) \cr \hline
+    \end{tabular}
+\end{center}
+
+\vspace*{\fill}
+\begin{flushright}
+    \textbf{\large Gabriela Mora} \\
+    \textbf{\large V-31.541.893}
+\end{flushright}
+
+\end{document}
