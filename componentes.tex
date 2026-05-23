@@ -1,0 +1,185 @@
+\documentclass[14pt,a4paper]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{mathpazo}
+\usepackage{indentfirst}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{array}
+
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\linespread{1.3}
+\setlength{\parindent}{0.7cm}
+\setlength{\parskip}{0.5em}
+
+\begin{document}
+
+\begin{flushright}
+    \textbf{Gabriela Mora} \\
+    V-31.541.893
+\end{flushright}
+
+\vspace{0.5cm}
+
+\begin{center}
+    {\Large \textbf{Diseño y Selección de Componentes Hardware para una Estación de Trabajo de Animación 3D}} \\
+    \vspace{0.3cm}
+\end{center}
+
+\vspace{0.4cm}
+
+Elegí enfocar este proyecto en la animación 3D porque me parece el escenario ideal para entender cómo interactúan el hardware y el software ante problemas lógicos y de cálculo masivo. Lejos de ser una tarea simple o un entorno de entretenimiento, la animación 3D es, desde la perspectiva de las ciencias de la computación, un sistema complejo que requiere resolver millions de operaciones matemáticas en paralelo por cada fotograma. 
+
+El objetivo de este informe es diseñar y justificar la selección de componentes para una estación de trabajo con un presupuesto estricto de \$3,000 USD. La meta es expresar una máquina donde las piezas estén perfectamente balanceadas, evitando los cuellos de botella térmicos o de transferencia de datos, permitiendo que el software funcione a su máxima capacidad. 
+
+Para entender por qué se seleccionaron estas piezas, primero debemos desglosar qué ocurre a nivel de código y procesamiento dentro de un programa de diseño 3D. El software no trabaja en el aire; cada herramienta que usamos se traduce en instrucciones que van directo a los transistores de la máquina de forma continua.
+
+\section*{\centering La Animación 3D como Problema Computacional}
+
+Desde el punto de vista de la informática, modelar y animar en tres dimensiones no es un proceso de dibujo, sino una simulación numérica continua. Los problemas principales que el hardware debe resolver simultáneamente se resumen en los siguientes puntos lógicos:
+
+\subsection*{\centering Carga Geométrica y Matrices}
+Cada objeto en una escena es una malla de vértices en un espacio tridimensional con coordenadas $(x, y, z)$. Cuando un personaje se mueve, la computadora aplica matrices de transformación (traslación, rotación y escala) multiplicando matrices de $4 \times 4$ por vectores tridimensionales miles de veces por segundo. Si una escena tiene personajes detallados, estamos hablando de calcular posiciones de manera geométrica para millones de puntos en tiempo real.
+
+\subsection*{\centering Interpolación y Curvas de Movimiento}
+Los animadores no dibujan cada fotograma. Ellos colocan poses clave (keyframes) y el software calcula los fotogramas intermedios usando funciones polinómicas complejas como las curvas de Bezier o B-splines. Evaluar estas funciones matemáticas de forma fluida requiere un procesador central capaz de resolver hilos de ejecución de manera inmediata para que el espacio de trabajo no se congele durante el proceso de edición.
+
+\subsection*{\centering Cálculo de Iluminación (Ray Tracing)}
+Los motores modernos simulan el comportamiento físico de la luz lanzando millones de rayos virtuales que rebotan en la escena. Calcular dónde impacta cada rayo, qué material toca y qué color genera requiere una capacidad de cálculo estocástico masivo. Como la luz real es infinita, los algoritmos matemáticos deben aproximar estos resultados mediante ecuaciones de renderizado muy pesadas que saturan los componentes si no están optimizados.
+
+\subsection*{\centering Simulación de Físicas}
+El comportamiento del cabello, la ropa o el fuego no se anima a mano; se calcula mediante sistemas de ecuaciones diferenciales. Resolver estas ecuaciones de forma numérica implica que la computadora debe iterar sobre cada partícula o punto de control decenas de veces por segundo, actualizando su posición, velocidad y aceleración en base a fuerzas virtuales como la gravedad o el viento.
+
+\subsection*{\centering Jerarquía de Memoria y Cuellos de Botella}
+Un error común al armar computadoras es pasar por alto cómo se mueven los datos a través del sistema. Los archivos de un proyecto de animación en alta resolución pueden ocupar decenas de gigabytes. Aquí es donde entra en juego la jerarquía de memoria del computador, que va desde los niveles más rápidos y pequeños (caché del CPU y VRAM de la tarjeta gráfica) hasta los más grandes y lentos (memoria RAM del sistema y almacenamiento masivo SSD).
+
+Si los componentes rápidos no tienen la capacidad suficiente para albergar la escena de trabajo completa, el procesador se ve obligado a buscar los datos directamente en los niveles inferiores de la jerarquía. Este fenómeno genera un retraso crítico por tiempos de espera, conocido en computación como inanición de datos o cuello de botella. 
+
+Por lo tanto, una estación de trabajo para animación 3D debe cumplir con requisitos específicos de ancho de banda y almacenamiento intermedio: muchos núcleos en el CPU para paralelizar el renderizado clásico de imágenes, miles de núcleos pequeños en la GPU para el cálculo visual en tiempo real, suficiente VRAM en la gráfica para store texturas, RAM de alta velocidad para evitar el uso del almacenamiento como memoria virtual y un disco sólido NVMe para transferir librerías de objetos sin retrasos.
+
+Para cumplir con estas necesidades y respetando la regla del proyecto, se estructuró una configuración de componentes que optimiza el flujo de datos sin superar el límite de presupuesto establecido de \$3,000 USD.
+
+\section*{\centering Especificaciones del Sistema y Presupuesto}
+
+Para optimizar el espacio y la legibilidad del documento, el presupuesto ha sido estructurado en dos bloques técnicos: los componentes esenciales de procesamiento base y los componentes dedicados al soporte y ensamblaje energético del sistema.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|m{2.5cm}|>{\centering\arraybackslash}m{1.2cm}|m{6.5cm}|>{\centering\arraybackslash}m{1.2cm}|>{\raggedleft\arraybackslash}m{1.8cm}|}
+\hline
+\textbf{Componente} & \textbf{Visual} & \textbf{Modelo Seleccionado} & \textbf{Enlace} & \textbf{Costo (USD)} \\ \hline
+
+1. CPU & \includegraphics[width=0.8cm]{CPU.png} & AMD Ryzen 9 7950X3D (16 núcleos / 32 hilos) & \href{https://www.amazon.com/-/es/AMD-Procesador-escritorio-RyzenTM-7950X3D/dp/B0BTRH9MNS/}{Amazon} & \$709.99 \\ \hline
+
+2. GPU & \includegraphics[width=0.8cm]{tarjetagrafica.png} & ASUS Prime GeForce RTX 5060 Ti 16GB GDDR7 & \href{https://www.amazon.com/-/es/Tarjeta-gr%C3%A1fica-GeForce-ventiladores-tecnolog%C3%ADa/dp/B0GMFLW1FR/}{Amazon} & \$699.00 \\ \hline
+
+3. Placa Base & \includegraphics[width=0.8cm]{placabase.png} & ASUS TUF Gaming B850M-PLUS WiFi AM5 & \href{https://www.amazon.com/-/es/TUF-Gaming-B850M-PLUS-Type-C%C2%AE-FlashbackTM/dp/B0DPLQQ7VJ}{Amazon} & \$249.99 \\ \hline
+
+4. Memoria RAM & \includegraphics[width=0.8cm]{ram.png} & G.SKILL Flare X5 Series DDR5 64GB (2x32GB) & \href{https://www.amazon.com/-/es/G-SKILL-Ripjaws-CL36-36-36-96-computadora-escritorio/dp/B0C6HWKGWV}{Amazon} & \$849.01 \\ \hline
+
+5. Almacenamiento & \includegraphics[width=0.8cm]{ssd.png} & WD\_Black 2TB SN770 NVMe PCIe 4.0 & \href{https://www.amazon.com/-/es/WD_BLACK-SN770/dp/B0GV1RCHX2}{Amazon} & \$219.98 \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|m{2.5cm}|>{\centering\arraybackslash}m{1.2cm}|m{6.5cm}|>{\centering\arraybackslash}m{1.2cm}|>{\raggedleft\arraybackslash}m{1.8cm}|}
+\hline
+\textbf{Componente} & \textbf{Visual} & \textbf{Modelo Seleccionado} & \textbf{Enlace} & \textbf{Costo (USD)} \\ \hline
+
+6. Fuente Poder & \includegraphics[width=0.8cm]{fuentedepoder.png} & CORSAIR RM850x Shift (2025) ATX 3.1 & \href{https://www.amazon.com/-/es/CORSAIR-Fuente-alimentaci%C3%B3n-totalmente-modular/dp/B0FPGD7XDK}{Amazon} & \$149.99 \\ \hline
+
+7. Case & \includegraphics[width=0.8cm]{case.png} & CORSAIR 4000D RS ARGB Flow & \href{https://www.amazon.com/-/es/CORSAIR-Carcasa-torre-media-modular/dp/B0DFHNV7TK}{Amazon} & \$99.99 \\ \hline
+
+8. Vent. Extra & \includegraphics[width=0.8cm]{ventilador.png} & CORSAIR RS120 ARGB PWM 120mm & \href{https://www.amazon.com/-/es/CORSAIR-RS120-ARGB-Ventilador-PWM/dp/B0D49P43QP}{Amazon} & \$16.99 \\ \hline
+
+9. Pasta Térmica & \includegraphics[width=0.8cm]{pastatermica.png} & Pasta Térmica GT-1 Silver (Pack de 2) & \href{https://www.amazon.com/-/es/GENNEL-GT-1-compuesta-rendimiento-impedancia/dp/B0CBN1R5VP/}{Amazon} & \$4.99 \\ \hline
+
+\multicolumn{4}{|r|}{\textbf{Costo Total General:}} & \textbf{\$2,999.93} \\ \hline
+\end{tabular}
+\end{table}
+
+\vspace{0.3cm}
+
+Para comprender el rendimiento de esta estación de trabajo en animación 3D, es necesario analizar el aporte específico de cada componente. A continuación, se desglosa cómo responde cada pieza cuando el software le exige procesar datos complejos en tiempo real.
+
+\subsection*{\centering Procesador (CPU - AMD Ryzen 9 7950X3D)}
+Elegir este CPU es la mejor decisión por su arquitectura híbrida. Tiene 16 núcleos y 32 hilos que corren a una velocidad brutal de hasta 5.7 GHz. En animación 3D, el procesador se encarga de dos cosas muy distintas. Primero, cuando estás modelando, moviendo un personaje o calculando físicas de ropa y cabello, el programa usa un solo núcleo a la vez porque cada cálculo depende del fotograma anterior. Aquí la alta frecuencia de reloj evita que la pantalla se congele. Segundo, incorpora la tecnología 3D V-Cache con 144 MB de memoria caché L3. Esto es revolucionario para nosotros: es una memoria ultrarrápida metida dentro del propio chip que almacena las mallas geométricas pesadas. Al no tener que viajar constantemente a la RAM principal a buscar los datos de los objetos, el CPU procesa todo al instante. Cuando lanzas el render final por motores como Arnold, los 32 hilos se activan al 100\% en paralelo, reduciendo los tiempos de espera de horas a minutos.
+
+\subsection*{\centering Tarjeta Gráfica (GPU - ASUS Prime RTX 5060 Ti 16GB)}
+La tarjeta de video es el motor visual del proyecto y la elegí específicamente por sus 16 GB de VRAM GDDR7. Cuando trabajas en Blender o Maya, estás viendo una previsualización en tiempo real (viewport). Si tu escena tiene millones de polígonos y texturas en resolución 4K, una tarjeta común se queda sin memoria de video y el programa se cierra o va a tirones. Con 16 GB aseguramos que toda la escena se quede grabada directamente en la tarjeta. Además, la arquitectura de esta GPU incluye núcleos dedicados exclusivamente al trazado de rayos (RT Cores). En lugar de que el procesador calcule los rebotes de luz usando filas de código matemático lento, la GPU lo resuelve por hardware de forma nativa. Esto te permite activar la vista renderizada en tiempo real con una fluidez increíble mientras sigues editando el escenario.
+
+\subsection*{\centering Placa Base (ASUS TUF Gaming B850M-PLUS WiFi AM5)}
+De nada sirve tener el mejor procesador y la mejor gráfica si la tarjeta madre no puede comunicar los datos a la misma velocidad. Esta placa incluye el chipset B850 y líneas PCIe 5.0, lo que significa que el canal de comunicación entre el almacenamiento, el procesador y la GPU es gigantesco, eliminando cualquier cuello de botella en la transferencia de datos. Otro punto crucial por el que fue una excelente decisión es su sistema de entrega de energía (VRM) de 14+2+1 fases. Cuando dejas la computadora renderizando una animación toda la noche, el CPU consume el máximo de energía de forma constante. Esta placa regula y estabiliza el voltaje para que los componentes no sufran picos eléctricos y disipa el calor de los circuitos para evitar que la máquina se apague a mitad del trabajo.
+
+\subsection*{\centering Memoria RAM (G.SKILL Flare X5 Series 64GB DDR5)}
+Para animación 3D, 16 GB o incluso 32 GB de RAM se quedan cortos muy rápido. Al abrir programas de diseño, el sistema operativo carga toda la geometría, el historial de "deshacer" (Ctrl+Z) y los archivos de texturas en la RAM. Si te quedas sin espacio, la computadora empieza a usar el disco duro como memoria secundaria, haciendo que todo vaya mil veces más lento. Configurar 64 GB de tecnología DDR5 a 6000 MHz nos garantiza que el software tenga un espacio masivo para trabajar con total soltura, incluso si tenemos abiertos Blender, Photoshop y Substance Painter al mismo tiempo. Es la decisión ideal para no sufrir por pantallas congeladas.
+
+\subsection*{\centering Almacenamiento (SSD - WD Black SN770 2TB NVMe)}
+Un proyecto de animación no es solo un archivo de texto; son carpetas llenas de secuencias de imágenes sin comprimir, cachés de simulaciones de fluidos que pesan gigabytes y librerías de objetos 3D. Este disco sólido PCIe 4.0 lee a 5,150 MB/s. Fue seleccionado porque reduce a segundos el tiempo que tarda el programa en abrirse y en importar elementos pesados a la escena, manteniendo un flujo de trabajo dinámico y sin interrupciones.
+
+\subsection*{\centering Fuente de Poder (CORSAIR RM850x Shift 850W)}
+El hardware de gama alta consume mucha energía bajo carga pesada. Esta fuente cuenta con certificación 80 Plus Gold (máxima eficiencia energética) y cumple con el estándar moderno ATX 3.1. Su conector nativo para las nuevas tarjetas de video evita adaptadores peligrosos. La elegí porque asegura que, cuando el CPU y la GPU estén trabajando al límite durante un renderizado largo, reciban energía limpia, constante y sin caídas de tensión que puedan dañar los componentes.
+
+\subsection*{\centering Case (CORSAIR 4000D RS ARGB Flow)}
+El peor enemigo del rendimiento es el calor. Si los componentes se calientan de más, se activa un sistema de protección llamado thermal throttling que baja las velocidades de reloj automáticamente para no quemar el silicio, destruyendo tu velocidad de render. Este chasis con frontal de malla y los ventiladores configurados en presión positiva garantizan que entre un flujo constante de aire fresco y se expulse el aire caliente de inmediato.
+
+\subsection*{\centering Ventilador Extra (CORSAIR RS120 ARGB)}
+Se añade un ventilador adicional en la parte trasera del case para crear un flujo de aire direccional. Los tres ventiladores frontales meten aire frío, y este ventilador trasero extrae el aire caliente que genera el flujo de trabajo continuo del CPU y del sistema, evitando que el calor se recircule dentro del gabinete y afecte a componentes como la placa base o el SSD.
+
+\subsection*{\centering Pasta Térmica (GT-1 Silver)}
+Se aplica en una capa delgada entre el CPU y el sistema de disipación para eliminar las burbujas de aire microscópicas y asegurar que el calor se transfiera de manera eficiente. Sin una buena pasta térmica, el aire atrapado actúa como aislante térmico y destruye el rendimiento.
+
+\section*{\centering Integración Hardware-Software en Animación 3D}
+
+Comprender el hardware solo tiene sentido si vemos cómo el software se comunica con él. Los programas de animación modernos ya no le dan órdenes genéricas a la computadora, sino que usan herramientas de programación avanzadas de bajo nivel para exprimir los componentes.
+
+Un ejemplo claro es la integración de la API \textbf{NVIDIA OptiX} en motores de renderizado como Cycles de Blender. En lugar de procesar los gráficos con código tradicional, el software detecta la arquitectura de nuestra tarjeta de video y activa directamente sus componentes dedicados:
+
+\begin{itemize}
+    \item \textbf{RT Cores:} Resuelven los cálculos de iluminación global y trazado de rayos en tiempo real por hardware, calculando los rebotes físicos de la luz de forma inmediata.
+    \item \textbf{Tensor Cores:} Usan algoritmos de inteligencia artificial para realizar \textit{denoising} (reducción de ruido). Limpian los granos de la imagen de forma predictiva, logrando una imagen final nítida en una fracción del tiempo tradicional.
+\end{itemize}
+
+\section*{\centering Optimización y Balance Técnico: La Ley de Amdahl}
+
+Para evaluar si los \$3,000 USD están bien invertidos en esta arquitectura, debemos aplicar un principio fundamental de los sistemas computacionales: la \textbf{Ley de Amdahl}. Esta ley matemática nos explica cuánta velocidad real ganamos al añadir más núcleos a un procesador, y se define con la siguiente fórmula:
+
+$$Speedup = \frac{1}{(1 - p) + \frac{p}{s}}$$
+
+Donde $p$ es la parte del programa que se puede dividir para que trabaje en paralelo, $s$ es la aceleración que recibe esa parte gracias a los nuevos núcleos, y $(1 - p)$ es la sección secuencial del código que obligatoriamente se debe resolver en fila, un cálculo detrás de otro.
+
+Al aplicar esto a nuestro entorno de trabajo, entendemos por qué el Ryzen 9 7950X3D es la decisión perfecta para la animación 3D:
+
+\begin{itemize}
+    \item \textbf{En el Renderizado:} Aquí la variable $p$ es casi del 100\% (cercana a 1). El software divide la imagen en una cuadrícula y le asigna un cuadro independiente a cada hilo del procesador. Como los núcleos no tienen que esperar datos de los demás, añadir 32 hilos reduce el tiempo de renderizado de forma lineal y masiva.
+    \item \textbf{En el Modelado y Animación:} Tareas como mover vértices, aplicar deformadores de huesos (\textit{rigging}) o calcular dinámicas de fluidos tienen un componente secuencial $(1-p)$ muy alto. La computadora no puede calcular dónde cae una gota de agua en el fotograma 10 si no ha resuelto el fotograma 9. Aquí tener muchos núcleos no sirve de nada. Sin embargo, como nuestro CPU tiene una frecuencia mononúcleo altísima de 5.7 GHz, resuelve esta parte en fila a la velocidad de la luz, manteniendo el viewport fluido.
+\end{itemize}
+
+\section*{\centering Conclusión}
+
+El diseño de esta estación de trabajo demuestra que configurar una computadora para tareas pesadas de computación gráfica no se trata de comprar lo más caro porque sí, sino de entender cómo interactúan los algoritmos del software con los transistores del hardware. 
+
+Con un presupuesto límite de exactamente \$3,000 USD (ajustado en la asignación de componentes a \$2,999.93 USD), se logró estructurar un sistema impecablemente balanceado. La combinación de un procesador con memoria caché vertical avanzada y una GPU de última generación con 16 GB de VRAM soluciona de forma directa tanto los problemas de procesamiento paralelo masivo (renderizado) como las limitaciones secuenciales explicadas por la Ley de Amdahl (animación y físicas). 
+
+A su vez, la selección de una tarjeta madre robusta, una fuente de poder eficiente con estándares modernos y un sistema de enfriamiento de alto flujo garantiza que la máquina pueda trabajar al 100\% de su capacidad durante largas jornadas de producción sin sufrir degradación térmica o fallas eléctricas. Este proyecto une los fundamentos teóricos de la arquitectura de computadoras con una solución práctica y optimizada para las demandas reales de la industria del diseño y la animación 3D.
+
+\end{document}
