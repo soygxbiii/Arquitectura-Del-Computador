@@ -1,0 +1,284 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{multirow}
+\geometry{letterpaper, margin=1in}
+
+\begin{document}
+
+\begin{flushright}
+Gabriela Mora, V-31.541.893 \\
+Lucía Martínez, V-31.906.577 \\
+\end{flushright}
+
+\vspace{1cm}
+
+\begin{center}
+\LARGE\textbf{Práctica del Laboratorio 4} \\
+\vspace{0.3cm}
+\large Arquitectura del Computador \\
+\vspace{0.3cm}
+\normalsize 5 de Agosto de 2026
+\end{center}
+
+\vspace{1cm}
+
+\begin{center}
+\subsection*{1. Explique con un diagrama cómo funciona el ciclo de una interrupción de hardware (desde que ocurre el evento hasta que se atiende):}
+\end{center}
+
+Ocurre el evento → el hardware activa la línea INT, el procesador guarda el estado (EPC, CAUSA), deshabilita interrupciones y salta al manejador.
+
+Se ejecuta la ISR → identifica el dispositivo (lectura de INT\_ID), atiende la interrupción y realiza el trabajo necesario.
+
+Se retorna → se restauran registros, se habilita IE, se ejecuta ERET y el PC vuelve a EPC, continuando el programa principal.
+
+\vspace{0.5cm}
+
+\begin{center}
+\includegraphics[width=0.9\textwidth]{foto.png}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+\subsection*{2. ¿Qué diferencias hay entre gestionar E/S con sondeo y hacerlo con interrupciones?:}
+\end{center}
+
+El sondeo (polling) consiste en que el procesador consulta constantemente el estado de los dispositivos de E/S en un bucle, lo que desperdicia ciclos de CPU aunque no haya datos pendientes, pero su implementación es simple y predecible.
+
+En cambio, las interrupciones permiten que el dispositivo "avise" al procesador solo cuando necesita atención, liberando la CPU para otras tareas y mejorando la eficiencia global del sistema. Sin embargo, las interrupciones introducen una sobrecarga adicional por el cambio de contexto (guardar/restaurar registros, ejecutar la ISR y retornar con ERET), mientras que el sondeo no tiene ese costo de latencia.
+
+El sondeo es adecuado para sistemas pequeños o con pocos dispositivos, mientras que las interrupciones son indispensables en sistemas multitarea o con múltiples periféricos que requieren respuesta rápida y eficiente.
+
+\vspace{0.5cm}
+
+\begin{center}
+\subsection*{3. ¿Qué ventajas tiene el uso de interrupciones en términos de uso del procesador?:}
+\end{center}
+
+Con las interrupciones, el procesador no tiene que estar preguntando todo el tiempo si un dispositivo necesita atención, así que puede dedicarse a otras tareas mientras no pasa nada. Cuando el dispositivo realmente necesita algo, él mismo avisa y la CPU lo atiende en ese momento, sin perder el tiempo revisando estados vacíos. Esto hace que el procesador trabaje de forma mucho más inteligente, porque solo gasta ciclos cuando hay trabajo real que hacer. Al final, el sistema responde más rápido, consume menos energía y puede manejar varios periféricos a la vez sin que el rendimiento se desplome.
+
+\begin{center}
+\subsection*{4. ¿Qué registros especiales se utilizan en MIPS32 para gestionar interrupciones?:}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|p{3cm}|p{9cm}|}
+\hline
+\textbf{Registro} & \textbf{Función} \\ \hline
+\$status & Controla la habilitación global de interrupciones y la máscara de periféricos. \\ \hline
+\$cause & Indica qué interrupción ocurrió y si estaba en un delay slot. \\ \hline
+\$epc & Guarda la dirección de retorno para volver al programa principal tras la interrupción. \\ \hline
+\$badvaddr & Almacena direcciones inválidas (solo para excepciones de memoria). \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\subsection*{5. ¿Por qué es necesario guardar el contexto (registros) al entrar en una rutina de servicio?:}
+\end{center}
+
+Es necesario guardar el contexto porque la rutina de interrupción va a usar los registros del procesador para hacer su trabajo, y si los modifica sin guardarlos, al volver al programa principal este encontrará sus datos corruptos y fallará. El programa principal estaba ejecutándose con unos valores concretos en registros como \$t0-\$t9, \$a0-\$a3 o \$v0-\$v1, y no sabe que ocurrió una interrupción, por lo que espera encontrar esos valores intactos.
+
+\vspace{0.5cm}
+
+\begin{center}
+\subsection*{6. Momentos en que pueden generarse excepciones en un sistema MIPS32:}
+\end{center}
+
+\paragraph*{a) Situaciones que generan excepciones en MIPS32:}
+
+\begin{itemize}
+    \item Desbordamiento aritmético (ADD/SUB con resultado fuera de rango).
+    \item Fallo de dirección (acceso a memoria no alineada o fuera de rango).
+    \item Instrucción no válida (código de operación no reconocido).
+    \item Llamada al sistema (SYSCALL) o instrucción de trap (BREAK).
+\end{itemize}
+
+\paragraph*{b) Etapas del pipeline que provocan excepción:}
+
+\begin{itemize}
+    \item \textbf{Decodificación (ID):} detecta instrucciones no válidas, SYSCALL o BREAK.
+    \item \textbf{Ejecución (EX):} detecta desbordamiento aritmético.
+    \item \textbf{Memoria (MEM):} detecta fallos de alineación o página no presente (TLB miss).
+    \item \textbf{Escritura (WB):} generalmente no genera excepciones, salvo casos muy específicos de coprocesador.
+\end{itemize}
+
+\begin{center}
+\subsection*{7. Estrategias de tratamiento de excepciones e interrupciones:}
+\end{center}
+
+\paragraph*{a) Diferencias entre interrupciones y excepciones:}
+
+\begin{center}
+\begin{tabular}{|p{5.5cm}|p{5.5cm}|}
+\hline
+\textbf{Interrupciones} & \textbf{Excepciones} \\ \hline
+Asíncronas: ocurren en cualquier momento, por eventos externos al procesador (hardware). & Síncronas: ocurren en un punto fijo de la ejecución, provocadas por la propia instrucción que se está ejecutando (desbordamiento, instrucción inválida, etc.). \\ \hline
+\end{tabular}
+\end{center}
+
+\paragraph*{b) Estrategias para tratar excepciones en MIPS32:}
+
+\vspace{0.3cm}
+
+\textbf{Estrategia 1 - Manejador único:}
+
+\begin{itemize}
+    \item Todas las excepciones saltan a una dirección fija (0x80000180 para excepciones, 0x80000000 para reset).
+    \item El manejador lee el registro \$cause para determinar el tipo de excepción y bifurca a la rutina específica.
+    \item Es simple y ocupa poco espacio, pero requiere lógica de decodificación adicional.
+\end{itemize}
+
+\textbf{Estrategia 2 - Manejador con tabla de vectores:}
+
+\begin{itemize}
+    \item Cada tipo de excepción tiene su propia dirección de entrada (según el ExcCode o IP).
+    \item El hardware calcula la dirección base + desplazamiento, saltando directamente a la ISR específica.
+    \item Es más rápido porque evita la decodificación, pero consume más memoria de código.
+\end{itemize}
+
+\vspace{0.3cm}
+
+\paragraph*{¿Cómo se redirige la ejecución hacia la rutina de servicio?:}
+
+\vspace{0.2cm}
+
+El procesador:
+
+\begin{enumerate}
+    \item Guarda la dirección de retorno en \$epc (PC de la instrucción que falló o la siguiente, según el bit BD de \$cause).
+    \item Guarda la causa en \$cause.
+    \item Deshabilita interrupciones (IE = 0 en \$status).
+    \item Carga el PC con la dirección del manejador (fija o vectorizada).
+\end{enumerate}
+
+\paragraph*{Función del registro EPC:}
+
+Almacena la dirección de retorno para que, tras ejecutar ERET, el procesador pueda volver al punto exacto donde fue interrumpido o donde ocurrió la excepción, continuando la ejecución normal o reintentando la instrucción fallida (si es recuperable).
+
+\begin{center}
+\subsection*{8. Habilitación de interrupciones en dispositivos y procesador:}
+\end{center}
+
+\paragraph*{a) Habilitación de interrupciones:}
+
+\vspace{0.2cm}
+
+\textbf{Teclado:}
+
+Se escribe un 1 en el bit de interrupt enable de su registro de control (ej. bit 0 del registro STATUS del periférico). Así el teclado genera una interrupción al pulsar una tecla o al llenar su buffer.
+
+\textbf{Pantalla:}
+
+Se activa el bit de habilitación de interrupciones en su registro de control (ej. bit IE del registro DISPLAY\_CTRL). Normalmente se configura para que interrumpa cuando termine una transferencia DMA o cuando el buffer de salida esté vacío.
+
+\vspace{0.2cm}
+
+\textbf{Procesador (registro \$status):}
+
+\begin{itemize}
+    \item Bit 0 (IE) → se pone a 1 para habilitar interrupciones globales.
+    \item Bits 8–15 (IM[7:2]) → máscara de interrupciones: se ponen a 1 los bits correspondientes a los periféricos que queremos atender (ej. bit 8 para teclado, bit 9 para pantalla, etc.).
+\end{itemize}
+
+\vspace{0.2cm}
+
+\paragraph*{b) ¿Qué pasaría si habilitamos interrupciones en los dispositivos pero no en el procesador?:}
+
+\vspace{0.2cm}
+
+Sería como tener el timbre de casa funcionando, pero con los oídos tapados. Los dispositivos generarían las interrupciones, pero el procesador las ignoraría por completo porque el bit IE del \$status está a 0. El sistema nunca atendería los eventos, los periféricos se quedarían bloqueados esperando servicio y el programa principal seguiría ejecutándose sin enterarse de nada, provocando pérdida de datos o un funcionamiento incorrecto.
+
+\begin{center}
+\subsection*{9. Procesamiento de interrupciones:}
+\end{center}
+
+\paragraph*{a) Paso a paso de interrupción de reloj:}
+
+\vspace{0.2cm}
+
+Cuando el temporizador alcanza el valor de comparación, el hardware guarda automáticamente el PC en \$epc, registra la causa en \$cause, deshabilita interrupciones (IE=0) y salta al manejador. El software entonces guarda en la pila los registros temporales (\$t0-\$t9, \$a0-\$a3, \$v0-\$v1, \$at) y también copias de \$epc y \$status. Luego lee \$cause para confirmar que es interrupción de reloj, ejecuta la ISR (actualiza ticks, programa el próximo \$compare y revisa tareas pendientes), restaura todos los registros desde la pila y ejecuta ERET, que recupera el PC desde \$epc y reactiva las interrupciones globales.
+
+\vspace{0.2cm}
+
+\paragraph*{b) Importancia de guardar el contexto:}
+
+\vspace{0.2cm}
+
+Es vital porque el programa principal no sabe que ocurrió una interrupción y espera que sus registros sigan intactos. Si la ISR los modifica sin restaurarlos, al volver el programa encontrará datos corruptos y fallará. Guardar el contexto es como hacer una "foto" del estado del procesador para devolverlo exactamente igual, asegurando que la interrupción sea completamente transparente para el código interrumpido.
+
+\begin{center}
+\subsection*{10. Interrupciones de reloj y control de ejecución:}
+\end{center}
+
+\paragraph*{a) Uso de la interrupción de reloj para control de ejecución:}
+
+\vspace{0.2cm}
+
+La interrupción de reloj permite al sistema operativo tomar el control periódicamente y comprobar cuánto tiempo lleva ejecutándose un programa. Si el programa supera su tiempo máximo sin ceder la CPU, el SO asume que está en un bucle infinito y lo finaliza forzosamente, liberando los recursos y evitando que monopolice el procesador, garantizando así la estabilidad del sistema.
+
+\vspace{0.2cm}
+
+\paragraph*{b) Qué hacer si el programa finaliza antes de la interrupción:}
+
+\vspace{0.2cm}
+
+Si el programa termina voluntariamente antes de que llegue la interrupción, el SO debe cancelar el contador de tiempo asociado a ese proceso y reorganizar la planificación. Así, cuando llegue la siguiente interrupción de reloj, no se intentará finalizar un programa que ya no existe, y el temporizador se reprogramará correctamente para el siguiente proceso en ejecución.
+
+\begin{center}
+\subsection*{11. Análisis y Discusión de los Resultados:}
+\end{center}
+
+Los dos códigos implementan sistemas en ensamblador MIPS utilizando memory-mapped I/O para la entrada de teclado y la syscall 30 para la temporización mediante sondeo (polling), evitando el uso de interrupciones de hardware.
+
+\vspace{0.2cm}
+
+\textbf{Captura de caracteres:}
+
+\begin{itemize}
+    \item Ejecuta un intervalo fijo de 20 segundos capturando únicamente letras mayúsculas (A-Z, ASCII 65-90).
+    \item Almacena los datos en un búfer circular de 100 caracteres y muestra el resultado al cumplirse el tiempo.
+    \item Su estructura es un bucle principal lineal y continuo.
+\end{itemize}
+
+\vspace{0.2cm}
+
+\textbf{Semáforo secuencial:}
+
+\begin{itemize}
+    \item Inicia en verde y espera la pulsación de la tecla 's' (ASCII 115) para iniciar una secuencia cíclica: 20s en verde, 10s en amarillo y 30s en rojo.
+    \item Utiliza una función temporizadora modular reutilizable (jr \$ra) que mide milisegundos mediante la syscall 30.
+    \item Su estructura corresponde a una máquina de estados finitos.
+\end{itemize}
+
+\vspace{0.3cm}
+
+\begin{center}
+\begin{tabular}{|p{3cm}|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Aspecto} & \textbf{Caracteres} & \textbf{Semáforo} \\ \hline
+Método de E/S & Sondeo (Memory-mapped I/O) & Sondeo (Memory-mapped I/O) \\ \hline
+Temporización & Bucle activo con syscall 30 & Función reutilizable con syscall 30 \\ \hline
+Filtrado de entrada & Solo letras A-Z & Únicamente tecla 's' \\ \hline
+Estructura & Bucle principal con reinicio automático & Máquina de estados con secuencia fija \\ \hline
+Modularidad & Código lineal & Función temporizadora separada \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+
+\begin{center}
+\paragraph*{Conclusión}
+\end{center}
+
+\begin{center}
+Ambos enfoques priorizan el control total de los tiempos y la simplicidad del código por encima de la eficiencia en el uso de la CPU, adaptándose el primero a la adquisición de datos por tiempo y el segundo al control secuencial de estados.
+\end{center}
+
+\end{document}
