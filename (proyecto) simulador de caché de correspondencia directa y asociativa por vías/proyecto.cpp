@@ -5,18 +5,28 @@
 
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <string>
 
 using namespace std;
+
+//constante para el tamaño del bloque en palabras
+const int tamanoBloque = 4;
 
 //estructura que representa una linea de cache
 struct lineaCache
 {
-    int datos;     
-    int tag;        
+    int datos[tamanoBloque];  //array para almacenar un bloque completo
+    int tag;
     int ultimoUso;  //contador de reloj para LRU
-    bool valido; 
+    bool valido;
 
-    lineaCache(): datos(0), tag(-1), ultimoUso(0), valido(false){}
+    lineaCache(): tag(-1), ultimoUso(0), valido(false)
+    {
+        for(int i = 0; i < tamanoBloque; i++){
+            datos[i] = 0;
+        }
+    }
 };
 
 //clase que simula una cache asociativa por conjuntos
@@ -25,7 +35,7 @@ class caches
     private:
 
     int numConjuntos;
-    int vias; 
+    int vias;
     int reloj; //contador global para implementar LRU
     int aciertos;
     int fallos;
@@ -38,9 +48,10 @@ class caches
     {
         for (int p = 1; p <= cantidad; p++)
         {
-            int dir = direccion + p;
-            int indice = dir % numConjuntos;
-            int tag = dir / numConjuntos;
+            //calcula la direccion del siguiente bloque
+            int dirBloque = direccion + (p * tamanoBloque);
+            int indice = (dirBloque / tamanoBloque) % numConjuntos;
+            int tag = dirBloque / (tamanoBloque * numConjuntos);
             
             bool encontrado = false;
 
@@ -49,7 +60,8 @@ class caches
                 if (conjuntos[indice][i].valido && conjuntos[indice][i].tag == tag)
                 {
                     encontrado = true;
-                    conjuntos[indice][i].ultimoUso = reloj;
+                    //NO actualizamos ultimoUso para no distorsionar LRU
+                    break;
                 }
             }
             
@@ -60,7 +72,8 @@ class caches
                     if (!conjuntos[indice][i].valido)
                     {
                         conjuntos[indice][i].tag = tag;
-                        conjuntos[indice][i].datos = dir;
+                        for(int j = 0; j < tamanoBloque; j++)
+                            conjuntos[indice][i].datos[j] = dirBloque + j;
                         conjuntos[indice][i].valido = true;
                         conjuntos[indice][i].ultimoUso = reloj;
                         break;
@@ -84,16 +97,22 @@ class caches
     {
         reloj++; //incrementa el reloj global para LRU
         
-        int indice = direccion % numConjuntos; 
-        int tag = direccion / numConjuntos;
+        int indice = (direccion / tamanoBloque) % numConjuntos;
+        int tag = direccion / (tamanoBloque * numConjuntos);
+        int offset = direccion % tamanoBloque;
 
         for (int i = 0; i < vias; i++)
         {
             if (conjuntos[indice][i].valido && conjuntos[indice][i].tag == tag)
             {
-                dato = conjuntos[indice][i].datos;      
+                dato = conjuntos[indice][i].datos[offset];
                 conjuntos[indice][i].ultimoUso = reloj;
-                aciertos++; 
+                aciertos++;
+                
+                if (anticipo > 0) //si hay prefetch activado
+                {
+                    precargar(direccion, anticipo); //precarga direcciones futuras
+                }
                 return (true);
             }
         }
@@ -105,10 +124,11 @@ class caches
             if (!conjuntos[indice][i].valido)
             {
                 conjuntos[indice][i].tag = tag;
-                conjuntos[indice][i].datos = direccion;
+                for(int j = 0; j < tamanoBloque; j++)
+                    conjuntos[indice][i].datos[j] = direccion - offset + j;
                 conjuntos[indice][i].valido = true;
                 conjuntos[indice][i].ultimoUso = reloj;
-                dato = direccion;
+                dato = conjuntos[indice][i].datos[offset];
 
                 if (anticipo > 0) //si hay prefetch activado
                 {
@@ -132,11 +152,12 @@ class caches
 
         //reemplaza la linea LRU con el nuevo bloque
         conjuntos[indice][lru].tag = tag;
-        conjuntos[indice][lru].datos = direccion;
+        for(int j = 0; j < tamanoBloque; j++)
+            conjuntos[indice][lru].datos[j] = direccion - offset + j;
         conjuntos[indice][lru].valido = true;
         conjuntos[indice][lru].ultimoUso = reloj;
 
-        dato = direccion;
+        dato = conjuntos[indice][lru].datos[offset];
 
         if (anticipo > 0) //si hay prefetch activado
         {
@@ -192,50 +213,56 @@ void comparar(vector<int>& direcciones, int viasMax, int anticipo = 0)
     }
 }
 
+//funcion que lee las direcciones desde un archivo
+void leerArchivo(vector<int>& direcciones)
+{
+    ifstream archivo("entradaCache.txt");
+    int dir;
+    
+    direcciones.clear();
+    
+    if (archivo.is_open())
+    {
+        while (archivo >> dir)
+        {
+            direcciones.push_back(dir);
+        }
+        archivo.close();
+        cout << "Direcciones cargadas desde entradaCache.txt: " << direcciones.size() << endl;
+    }
+    else
+    {
+        cout << "No se pudo abrir el archivo entradaCache.txt" << endl;
+    }
+}
+
 //funcion que muestra el menu interactivo
 void menu()
 {
     vector<int> direcciones; //almacena las direcciones ingresadas por el usuario
 
     int opcion;
-    int direccion;
     int dato;
 
     do
     {
         cout << "\n--- MENU ---" << endl;
-        cout << "1. Ingresar direcciones" << endl;
+        cout << "1. Cargar direcciones desde archivo (entradaCache.txt)" << endl;
         cout << "2. Ver estadisticas" << endl;
         cout << "3. Comparar esquemas" << endl;
         cout << "4. Salir" << endl;
         cout << "Opcion: ";
         cin >> opcion;
 
-        if (opcion == 1) //ingresar direcciones
+        if (opcion == 1) //cargar direcciones desde archivo
         {
-            direcciones.clear();
-            cout << "Ingrese direcciones (0 para terminar):" << endl;
-            
-            while (true)
-            {
-                cout << "> ";
-                cin >> direccion;
-                
-                if (direccion == 0)
-                {
-                    break;
-                }
-                
-                direcciones.push_back(direccion);
-            }
-            
-            cout << "Direcciones guardadas: " << direcciones.size() << endl;
+            leerArchivo(direcciones);
         }
         else if (opcion == 2) //ver estadisticas con cache directa por defecto
         {
             if (direcciones.empty())
             {
-                cout << "Primero ingrese direcciones (opcion 1)" << endl;
+                cout << "Primero cargue direcciones (opcion 1)" << endl;
             }
             else
             {
@@ -253,7 +280,7 @@ void menu()
         {
             if (direcciones.empty())
             {
-                cout << "Primero ingrese direcciones (opcion 1)" << endl;
+                cout << "Primero cargue direcciones (opcion 1)" << endl;
             }
             else
             {
