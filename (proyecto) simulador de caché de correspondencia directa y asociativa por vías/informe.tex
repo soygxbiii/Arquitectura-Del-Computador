@@ -1,0 +1,245 @@
+\documentclass[14pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{float}
+
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+
+\renewcommand{\familydefault}{\sfdefault}
+
+\definecolor{codebg}{rgb}{0.95, 0.95, 0.95}
+\definecolor{codeblue}{rgb}{0.0, 0.0, 0.7}
+\definecolor{codegreen}{rgb}{0.0, 0.5, 0.0}
+\definecolor{codered}{rgb}{0.6, 0.0, 0.0}
+\definecolor{frameblue}{rgb}{0.2, 0.4, 0.8}
+
+\lstset{
+    language=C++,
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered},
+    numberstyle=\tiny\color{gray},
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{frameblue},
+    framerule=1.2pt,
+    framesep=8pt,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\renewcommand{\normalsize}{\fontsize{14}{18}\selectfont}
+\renewcommand{\large}{\fontsize{16}{20}\selectfont}
+\renewcommand{\Large}{\fontsize{20}{24}\selectfont}
+\renewcommand{\LARGE}{\fontsize{24}{28}\selectfont}
+
+\titleformat{\section}{\Large\bfseries\centering}{}{0em}{}
+\titleformat{\subsection}{\large\bfseries\centering}{}{0em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\centering}{}{0em}{}
+
+\begin{document}
+
+\begin{flushright}
+\large
+Gabriela Mora, V-31.541.893 \\
+Lucía Martínez, V-31.906.577 \\
+Maivet Pereira, V-30.814.708 \\
+\end{flushright}
+
+\vspace{1.5cm}
+
+\begin{center}
+    {\LARGE \textbf{Simulador de Caché de Correspondencia} \\[0.3cm]
+    \textbf{Directa y Asociativa por Vías}} \\[0.8cm]
+    \large Arquitectura del Computador \\[0.5cm]
+    \large 1 de Septiembre de 2026
+\end{center}
+
+\vspace{1.5cm}
+
+\section*{El Problema}
+
+\subsection*{Descripción del problema}
+
+La memoria caché es un pequeño espacio de almacenamiento ultrarrápido que el procesador utiliza para evitar ir constantemente a la memoria principal, que es mucho más lenta. El problema es que su tamaño es limitado y, si no se gestiona bien, el procesador pasa mucho tiempo esperando datos. Este proyecto simula su comportamiento para entender cómo optimizar su uso.
+
+\subsection*{Objetivos del proyecto}
+
+Desarrollar un simulador en C++ que modele el funcionamiento de una caché, permitiendo probar diferentes configuraciones (mapeo directo y asociativo por vías) y analizar su rendimiento en términos de aciertos y fallos.
+
+\subsection*{Alcance}
+
+Nuestro simulador trabaja con dos tipos de organización: la caché de mapeo directo, donde cada bloque de memoria solo puede ir a un lugar específico, y la caché asociativa por vías, que ofrece más flexibilidad al permitir que un bloque se ubique en varias líneas dentro de un conjunto.
+
+\section*{Técnicas Computacionales para su Solución}
+
+\subsection*{Estructuras de Datos en C++}
+
+La caché se modela utilizando una matriz de estructuras \texttt{lineaCache} con \texttt{std::vector}:
+
+\begin{itemize}
+    \item \textbf{\texttt{struct lineaCache}:} Representa un bloque de caché, conteniendo los campos \texttt{datos}, \texttt{tag}, \texttt{ultimoUso} y \texttt{valido}.
+\end{itemize}
+
+\begin{lstlisting}
+struct lineaCache
+{
+    int datos;     
+    int tag;         
+    int ultimoUso;  // contador de reloj para LRU
+    bool valido;   
+
+    lineaCache(): datos(0), tag(-1), ultimoUso(0), valido(false){}
+};
+\end{lstlisting}
+
+\begin{itemize}
+    \item \textbf{\texttt{vector<vector<lineaCache>> conjuntos;}:} Se utiliza una matriz de \texttt{vector} donde cada fila (conjunto) contiene un vector de líneas (vías). Esto permite un acceso directo por índice en tiempo constante O(1).
+    \item \textbf{\texttt{vector<int> direcciones;}:} Un arreglo dinámico para almacenar las direcciones ingresadas por el usuario.
+\end{itemize}
+
+\subsection*{Algoritmos de Simulación}
+
+\textbf{Cálculo de Índice y Tag:} Se utilizan las operaciones aritméticas (\texttt{\%} y \texttt{/}) para calcular el conjunto y la etiqueta a partir de la dirección.
+
+\subsubsection*{LRU (Least Recently Used)}
+
+El LRU es el algoritmo de reemplazo que usamos para decidir qué línea eliminar cuando la caché está llena. Su funcionamiento es sencillo: cada línea de caché tiene un contador llamado \texttt{ultimoUso} que se actualiza cada vez que se accede a ella. Cuando ocurre un fallo y no hay líneas libres, simplemente reemplazamos la línea con el valor más bajo en \texttt{ultimoUso}, es decir, la que lleva más tiempo sin ser utilizada.
+
+\begin{lstlisting}
+// si no hay lineas vacias, se aplica la politica de reemplazo LRU
+int lru = 0;
+
+// recorre todas las vias para encontrar la de menor ultimoUso
+for (int i = 1; i < vias; i++)
+{
+    if (conjuntos[indice][i].ultimoUso < conjuntos[indice][lru].ultimoUso)
+    {
+        lru = i;
+    }
+}
+
+// reemplaza la linea LRU con el nuevo bloque
+conjuntos[indice][lru].tag = tag;
+conjuntos[indice][lru].datos = direccion;
+conjuntos[indice][lru].valido = true;
+conjuntos[indice][lru].ultimoUso = reloj;
+\end{lstlisting}
+
+\subsubsection*{Prefetching (Anticipo de Datos)}
+
+El prefetching es una técnica que usamos para anticipar las necesidades del procesador. Cuando se produce un fallo y el prefetch está activado, no solo cargamos la dirección solicitada, sino también las direcciones siguientes (\texttt{direccion + 1}, \texttt{+2}, etc.). Esto aprovecha la localidad espacial, ya que los programas suelen acceder a datos cercanos en memoria. El resultado es una reducción significativa de los fallos, especialmente en patrones de acceso secuencial.
+
+\begin{lstlisting}
+void precargar(int direccion, int cantidad)
+{
+    for (int p = 1; p <= cantidad; p++)
+    {
+        int dir = direccion + p;
+        int indice = dir % numConjuntos;
+        int tag = dir / numConjuntos;
+        
+        bool encontrado = false;
+
+        for (int i = 0; i < vias; i++)
+        {
+            if (conjuntos[indice][i].valido && conjuntos[indice][i].tag == tag)
+            {
+                encontrado = true;
+                conjuntos[indice][i].ultimoUso = reloj;
+            }
+        }
+        
+        if (!encontrado)
+        {
+            for (int i = 0; i < vias; i++)
+            {
+                if (!conjuntos[indice][i].valido)
+                {
+                    conjuntos[indice][i].tag = tag;
+                    conjuntos[indice][i].datos = dir;
+                    conjuntos[indice][i].valido = true;
+                    conjuntos[indice][i].ultimoUso = reloj;
+                    break;
+                }
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection*{Organización de la Caché y Experimentación}
+
+El simulador mantiene un total de 16 líneas, permitiendo probar diferentes organizaciones:
+
+\begin{itemize}
+    \item \textbf{Mapeo Directo:} Cuando se usa \texttt{vias = 1}, cada dirección solo puede residir en un conjunto específico.
+    \item \textbf{Asociativa por Vías:} Al aumentar el número de vías (2, 4, 8, 16), los conjuntos se reducen, pero hay más flexibilidad para ubicar los datos, lo que reduce los fallos de conflicto.
+\end{itemize}
+
+\subsection*{Interfaz de Usuario}
+
+Se implementó un menú interactivo que permite:
+
+\begin{itemize}
+    \item Ingresar direcciones manualmente.
+    \item Ver las estadísticas de la caché (aciertos, fallos, tasa).
+    \item Comparar el rendimiento de diferentes esquemas (mapeo directo vs. asociativa) con o sin prefetch.
+\end{itemize}
+
+\section*{Análisis y Discusión de Resultados}
+
+\subsection*{Experimentos Realizados}
+
+Probamos tres tipos de secuencias: consecutiva (buena localidad), repetitiva (localidad mixta) y aleatoria (sin localidad). Cada una se probó con 1, 2, 4 y 8 vías, con y sin prefetch.
+
+\subsection*{Análisis}
+
+La caché de 8 vías dio la mejor tasa en todos los casos por su mayor flexibilidad para ubicar datos. El prefetch mejoró los resultados en secuencias consecutiva y repetitiva (aprovechando la localidad espacial), pero no tuvo efecto en la aleatoria. Esto confirma que el prefetch es útil solo cuando los accesos son predecibles.
+
+\begin{table}[H]
+\centering
+\caption{Tasas de acierto sin prefetch}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Secuencia} & \textbf{Directa} & \textbf{2 vías} & \textbf{4 vías} & \textbf{8 vías} \\
+\hline
+Consecutiva & 30\% & 50\% & 60\% & 70\% \\
+\hline
+Repetitiva & 25\% & 50\% & 62\% & 75\% \\
+\hline
+Aleatoria & 20\% & 30\% & 30\% & 40\% \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Tasas de acierto con prefetch (1 dirección)}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Secuencia} & \textbf{Directa} & \textbf{2 vías} & \textbf{4 vías} & \textbf{8 vías} \\
+\hline
+Consecutiva & 60\% & 80\% & 90\% & 100\% \\
+\hline
+Repetitiva & 50\% & 75\% & 87\% & 100\% \\
+\hline
+Aleatoria & 20\% & 30\% & 30\% & 40\% \\
+\hline
+\end{tabular}
+\end{table}
+
+\section*{Conclusiones}
+
+Este proyecto nos permitió comprender cómo influye la organización de la caché en el rendimiento del sistema. Comprobamos que la asociatividad por vías reduce los fallos de conflicto y que el prefetch mejora la tasa de aciertos cuando los accesos son secuenciales, pero no aporta beneficio en patrones aleatorios.
+
+Los objetivos se cumplieron: logramos un simulador funcional que permite probar configuraciones, calcular estadísticas y comparar esquemas con y sin prefetch.
+
+Las principales dificultades fueron implementar LRU y coordinar el trabajo en equipo, pero nos ayudaron a mejorar nuestras habilidades de programación y colaboración.
+
+\end{document}
